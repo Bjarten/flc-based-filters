@@ -185,7 +185,7 @@ class BMFLC():
         Frequrncey step
     """
 
-    def __init__(self, mu=0.01, fmin=6, fmax=7, dF=0.2):
+    def __init__(self, mu=0.01, fmin=3, fmax=9, dF=0.1):
         """
         Parameters
         ----------
@@ -241,13 +241,12 @@ class BMFLC():
         a=0
         b=0
         vest = 0
+
         for i in range(self.n):
             a += (self.W[0][i]**2+self.W[1][i]**2)*self.V[i]
-            for i in range(self.n):
-                b += self.W[0][i] ** 2 + self.W[1][i] ** 2
-            vest += a/b
-            a=0
-            b=0
+            b += self.W[0][i] ** 2 + self.W[1][i] ** 2
+        vest += a/b
+
         self.estimatedFrequency = vest/(2*math.pi)
 
         return y
@@ -609,16 +608,32 @@ class EBMFLC():
         mi = np.dot(np.transpose(self.Wi[0]), self.Xi[0]) + np.dot(np.transpose(self.Wi[1]), self.Xi[1])
 
 
-        a=0
-        b=0
+        # a=0
+        # b=0
+        # vest = 0
+        # for i in range((self.Nd-self.Nc)):
+        #     a += (self.Wi[0][i]**2+self.Wi[1][i]**2)*self.Vcd[i]
+        #     for j in range((self.Nd-self.Nc)):
+        #         b += self.Wi[0][i] ** 2 + self.Wi[1][j] ** 2
+        #     vest += a/b
+        #     a=0
+        #     b=0
+        # self.estimatedFrequency = vest/(2*math.pi)
+
+        b = 0
+        for j in range(self.Nd-self.Nc):
+            b += self.Wi[0][j]**2 + self.Wi[1][j]**2
+
+        if b == 0:
+            raise ValueError("Denominator cannot be zero")
+
+        a = 0
         vest = 0
-        for i in range((self.Nd-self.Nc)):
-            a += (self.Wi[0][i]**2+self.Wi[1][i]**2)*self.Vcd[i]
-            for i in range((self.Nd-self.Nc)):
-                b += self.Wi[0][i] ** 2 + self.Wi[1][i] ** 2
-            vest += a/b
-            a=0
-            b=0
-        self.estimatedFrequency = vest/(2*math.pi)
+        for i in range(self.Nd-self.Nc):
+            a += (self.Wi[0][i]**2 + self.Wi[1][i]**2) * self.Vcd[i]
+            vest += a / b
+            a = 0
+
+        self.estimatedFrequency = vest / (2 * math.pi)
 
         return mi
